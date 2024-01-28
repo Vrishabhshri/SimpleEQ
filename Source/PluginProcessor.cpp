@@ -228,16 +228,22 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts) {
     
 }
 
+Coefficients makePeakFilter(const ChainSettings& chainSettings, double sampleRate) {
+    
+    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.peakFreq, chainSettings.peakQuality, juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+    
+}
+
 void SimpleEQAudioProcessor::updatePeakFilter(const ChainSettings& chainSettings) {
     
-    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(), chainSettings.peakFreq, chainSettings.peakQuality, juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+    auto peakCoefficients = makePeakFilter(chainSettings, getSampleRate());
     
     *leftChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
     *rightChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
     
 }
 
-void SimpleEQAudioProcessor::updateCoefficients(Coefficients &old, const Coefficients &replacements) {
+void /*SimpleEQAudioProcessor::*/updateCoefficients(Coefficients &old, const Coefficients &replacements) {
     
     *old = *replacements;
     
@@ -285,9 +291,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::crea
     
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("Peak Freq", 1), "Peak Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 750.f));
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("Peak Gain", 1), "Peak Gain", juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f), 0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("Peak Gain", 4), "Peak Gain", juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f), 0.0f));
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("Peak Quality", 1), "Peak Quality", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f), 1.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID("Peak Quality", 5), "Peak Quality", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f), 1.f));
     
     juce::StringArray stringArray;
     for (int i = 0; i < 4; i++) {
@@ -297,9 +303,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::crea
         stringArray.add(str);
     }
     
-    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID("LowCut Slope", 1), "LowCut Slope", stringArray, 0));
+    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID("LowCut Slope", 6), "LowCut Slope", stringArray, 0));
     
-    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID("HighCut Slope", 1), "HighCut Slope", stringArray, 0));
+    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID("HighCut Slope", 7), "HighCut Slope", stringArray, 0));
     
     return layout;
     

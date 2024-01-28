@@ -40,7 +40,7 @@ void SimpleEQAudioProcessorEditor::paint (juce::Graphics& g)
     
     using namespace juce;
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (Colours::black);
+    g.fillAll (Colours::indigo);
 
     auto bounds = getLocalBounds();
     auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.4);
@@ -121,6 +121,22 @@ void SimpleEQAudioProcessorEditor::resized()
     peakFreqSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33));
     peakGainSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.5));
     peakQualitySlider.setBounds(bounds);
+    
+}
+
+void SimpleEQAudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue) {
+    
+    parametersChanged.set(true);
+    
+}
+
+void SimpleEQAudioProcessorEditor::timerCallback() {
+    
+    if (parametersChanged.compareAndSetBool(false, true)) {
+        
+        
+        
+    }
     
 }
 
