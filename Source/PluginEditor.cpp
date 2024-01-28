@@ -27,11 +27,28 @@ highCutSlopeSliderAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlope
         addAndMakeVisible(comp);
     }
     
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params ) {
+        
+        param->addListener(this);
+        
+    }
+    
+    startTimerHz(60);
+    
     setSize (600, 400);
 }
 
 SimpleEQAudioProcessorEditor::~SimpleEQAudioProcessorEditor()
 {
+    
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params ) {
+        
+        param->removeListener(this);
+        
+    }
+    
 }
 
 //==============================================================================
@@ -43,7 +60,7 @@ void SimpleEQAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll (Colours::indigo);
 
     auto bounds = getLocalBounds();
-    auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.4);
+    auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
     
     auto w = responseArea.getWidth();
     
@@ -62,7 +79,7 @@ void SimpleEQAudioProcessorEditor::paint (juce::Graphics& g)
         double mag = 1.f;
         auto freq = mapToLog10(double(i) / double(w), 20.0, 20000.0);
         
-        if (monoChain.isBypassed<ChainPositions::Peak>()) mag *= peak.coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (!monoChain.isBypassed<ChainPositions::Peak>()) mag *= peak.coefficients->getMagnitudeForFrequency(freq, sampleRate);
         
         if (!lowcut.isBypassed<0>()) mag *= lowcut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
         if (!lowcut.isBypassed<1>()) mag *= lowcut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
@@ -108,14 +125,14 @@ void SimpleEQAudioProcessorEditor::resized()
     // subcomponents in your editor..
     
     auto bounds = getLocalBounds();
-    auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.4);
+    auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
     
     auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
     auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
     
-    lowCutFreqSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.6));
+    lowCutFreqSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.5));
     lowCutSlopeSlider.setBounds(lowCutArea);
-    highCutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.6));
+    highCutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
     highCutSlopeSlider.setBounds(highCutArea);
     
     peakFreqSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33));
@@ -134,7 +151,13 @@ void SimpleEQAudioProcessorEditor::timerCallback() {
     
     if (parametersChanged.compareAndSetBool(false, true)) {
         
+        DBG(" params changed ");
         
+        auto chainSettings = getChainSettings(audioProcessor.apvts);
+        auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+        
+        repaint();
         
     }
     
