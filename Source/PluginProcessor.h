@@ -117,37 +117,18 @@ private:
         
         switch(slope) {
                 
-            case Slope_12:
-                *chain.template get<0>().coefficients = *cutCoefficients[0];
-                chain.template setBypassed<0>(false);
-                break;
-            case Slope_24:
-                *chain.template get<0>().coefficients = *cutCoefficients[0];
-                chain.template setBypassed<0>(false);
-                *chain.template get<1>().coefficients = *cutCoefficients[1];
-                chain.template setBypassed<1>(false);
-                break;
-            case Slope_36:
-                *chain.template get<0>().coefficients = *cutCoefficients[0];
-                chain.template setBypassed<0>(false);
-                *chain.template get<1>().coefficients = *cutCoefficients[1];
-                chain.template setBypassed<1>(false);
-                *chain.template get<2>().coefficients = *cutCoefficients[2];
-                chain.template setBypassed<2>(false);
-                break;
-            case Slope_48:
-                *chain.template get<0>().coefficients = *cutCoefficients[0];
-                chain.template setBypassed<0>(false);
-                *chain.template get<1>().coefficients = *cutCoefficients[1];
-                chain.template setBypassed<1>(false);
-                *chain.template get<2>().coefficients = *cutCoefficients[2];
-                chain.template setBypassed<2>(false);
-                *chain.template get<3>().coefficients = *cutCoefficients[3];
-                chain.template setBypassed<3>(false);
-                break;
+            case Slope_48: update<3>(chain, cutCoefficients);
+            case Slope_36: update<2>(chain, cutCoefficients);
+            case Slope_24: update<1>(chain, cutCoefficients);
+            case Slope_12: update<0>(chain, cutCoefficients);
                 
         }
     };
+    
+    void updateLowCutFilters(const ChainSettings& chainSettings);
+    void updateHighCutFilters(const ChainSettings& chainSettings);
+    
+    void updateFilters();
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEQAudioProcessor)
