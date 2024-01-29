@@ -23,11 +23,11 @@ void LookAndFeel::drawRotarySlider(juce::Graphics & g,
     
     auto bounds = Rectangle<float>(x, y, width, height);
     
-    g.setColour(Colour(97u, 18u, 167u));
+    g.setColour(Colours::white);
     g.fillEllipse(bounds);
     
-    g.setColour(Colour(255u, 154u, 1u));
-    g.drawEllipse(bounds, 1.f);
+    g.setColour(Colours::blueviolet);
+    g.drawEllipse(bounds, 3.f);
     
     if ( auto* rswl = dynamic_cast<RotarySliderWithLabels*>(&slider)) {
         
@@ -35,11 +35,12 @@ void LookAndFeel::drawRotarySlider(juce::Graphics & g,
         
         Path p;
         
+        //Control knob bar
         Rectangle<float> r;
         r.setLeft(center.getX() - 2);
         r.setRight(center.getX() + 2);
         r.setTop(bounds.getY());
-        r.setBottom(center.getY() - rswl->getTextHeight() * 1.5);
+        r.setBottom(center.getY() * 0.8);
         
         p.addRoundedRectangle(r, 2.f);
         
@@ -55,8 +56,9 @@ void LookAndFeel::drawRotarySlider(juce::Graphics & g,
         auto text = rswl->getDisplayString();
         auto strWidth = g.getCurrentFont().getStringWidth(text);
         
-        r.setSize(strWidth + 4, rswl->getTextHeight() + 2);
-        r.setCentre(center);
+        //Setting placement of knob text
+        r.setSize(strWidth + 4, rswl->getTextHeight() + 4);
+        r.setCentre(bounds.getCentreX(), 10);
         
         g.setColour(Colours::blue);
         g.fillRect(r);
@@ -81,14 +83,21 @@ void RotarySliderWithLabels::paint(juce::Graphics &g) {
     
 //    g.setColour(Colours::red);
 //    g.drawRect(getLocalBounds());
+//    
 //    g.setColour(Colours::yellow);
 //    g.drawRect(sliderBounds);
     
+    
+    //Painting knobs
+    auto knobBounds = getSliderBounds();
+    knobBounds.setSize(getSliderBounds().getWidth() * 0.8, getSliderBounds().getHeight() * 0.8);
+    knobBounds.setCentre(getSliderBounds().getCentre());
+    
     getLookAndFeel().drawRotarySlider(g, 
-                                      sliderBounds.getX(),
-                                      sliderBounds.getY(),
-                                      sliderBounds.getWidth(),
-                                      sliderBounds.getHeight(),
+                                      knobBounds.getX(),
+                                      knobBounds.getY(),
+                                      knobBounds.getWidth(),
+                                      knobBounds.getHeight(),
                                       jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0),
                                       startAng,
                                       endAng,
@@ -97,7 +106,9 @@ void RotarySliderWithLabels::paint(juce::Graphics &g) {
     auto center = sliderBounds.toFloat().getCentre();
     auto radius = sliderBounds.getWidth() * 0.5f;
     
-    g.setColour(Colour(0u, 172u, 1u));
+    
+    //Painting labels for knobs
+    g.setColour(Colours::green);
     g.setFont(getTextHeight());
     
     auto numChoices = labels.size();
@@ -115,7 +126,7 @@ void RotarySliderWithLabels::paint(juce::Graphics &g) {
         auto str = labels[i].label;
         r.setSize(g.getCurrentFont().getStringWidth(str), getTextHeight());
         r.setCentre(c);
-        r.setY(r.getY() + getTextHeight());
+        r.setY(r.getY() * 1.05);
         
         g.drawFittedText(str, r.toNearestInt(), juce::Justification::centred, 1);
         
@@ -132,8 +143,8 @@ juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const {
     size -= getTextHeight() * 2;
     juce::Rectangle<int> r;
     r.setSize(size, size);
-    r.setCentre(bounds.getCentreX(), 0);
-    r.setY(2);
+    r.setCentre(bounds.getCentreX(), bounds.getCentreY() * 1.1);
+//    r.setY(2);
     
     return r;
     
@@ -249,7 +260,7 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     
     using namespace juce;
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (Colours::indigo);
+    g.fillAll (Colours::tomato);
 
     auto responseArea = getLocalBounds();
     
